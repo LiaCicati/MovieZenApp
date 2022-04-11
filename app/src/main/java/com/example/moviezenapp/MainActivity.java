@@ -12,12 +12,15 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.moviezenapp.viewmodels.MainActivityViewModel;
 import com.example.moviezenapp.viewmodels.MovieViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -27,14 +30,16 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     AppBarConfiguration appBarConfiguration;
     private MovieViewModel movieViewModel;
+    private MainActivityViewModel viewModel;
     boolean isPopular = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        viewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
         setContentView(R.layout.activity_main);
         movieViewModel = new ViewModelProvider(this).get(MovieViewModel.class);
-
+        checkIfSignedIn();
         setupNavigation();
 
     }
@@ -84,6 +89,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void checkIfSignedIn() {
+        viewModel.getCurrentUser().observe(this, user -> {
+            if (user != null) {
+                Log.v("Logging", "HELLO!!!" + viewModel.getCurrentUser().getValue().getEmail());
+            } else {
+                startLoginActivity();
+            }
+        });
+    }
+
+    private void startLoginActivity() {
+        startActivity(new Intent(this, SignInActivity.class));
+        finish();
+    }
+
+    public void signOut(View v) {
+        viewModel.signOut();
     }
 
 
